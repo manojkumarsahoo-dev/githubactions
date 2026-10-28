@@ -1,0 +1,41 @@
+name: Secure DevSecOps Pipeline - Day 3 (Self-Hosted & Sequential)
+
+on: 
+  push: 
+    branches: 
+      - master 
+      - main 
+  workflow_dispatch:  
+
+jobs: 
+  build: 
+    runs-on: ubuntu-latest # You can switch to 'self-hosted' when you configure your local runner!
+    steps: 
+      - name: Checkout Code 
+        uses: actions/checkout@v4 
+
+      - name: Cache Dependencies 
+        uses: actions/cache@v4 
+        with: 
+          path: ~/.npm 
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} 
+ 
+      - name: Build 
+        run: npm install 
+
+  test: 
+    runs-on: ubuntu-latest
+    needs: build # Sequential dependency: runs only after 'build' succeeds
+    steps: 
+      - name: Checkout Code 
+        uses: actions/checkout@v4 
+
+      - name: Test 
+        run: echo "code is tested successfully!" 
+
+  deploy: 
+    runs-on: ubuntu-latest
+    needs: test # Sequential dependency: runs only after 'test' succeeds
+    steps: 
+      - name: Deploy 
+        run: echo "code is deployed successfully!"
